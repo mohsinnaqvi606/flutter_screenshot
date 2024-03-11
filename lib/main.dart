@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:flutter/rendering.dart';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:screenshot_testing/result.dart';
 
@@ -37,45 +39,46 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ScreenshotController screenshotController = ScreenshotController();
+  final GlobalKey globalKey = GlobalKey();
 
   void _incrementCounter() async {
-    Uint8List? list = await screenshotController.capture();
-    if (list != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ResultView(list: list)),
-      );
-    }
+    captureScreen().then((Uint8List? image) async {
+      if (image != null) {
+        final result = await ImageGallerySaver.saveImage(image);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ResultView(list: image)),
+        );
+      }
+    });
+  }
+
+  Future<Uint8List?> captureScreen() async {
+    RenderRepaintBoundary boundary =
+        globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //   title: Text(widget.title),
-      // ),
-      body: Screenshot(
-        controller: screenshotController,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Image.asset('assets/images/1.jpg',
-                  fit: BoxFit.fill, height: MediaQuery.sizeOf(context).height),
-            ),
-            Expanded(
-                child: Image.asset(
-              'assets/images/2.jpg',
-              fit: BoxFit.fill,
-              height: MediaQuery.sizeOf(context).height,
-            )),
-          ],
-        ),
-      ),
+      body: RepaintBoundary(
+          key: globalKey,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                  child: Image.asset(
+                'assets/images/3.jpg',
+                fit: BoxFit.cover,
+                height: MediaQuery.sizeOf(context).height,
+              )),
+            ],
+          )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
-        tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
