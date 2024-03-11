@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() async {
     captureScreen().then((Uint8List? image) async {
       if (image != null) {
-        final result = await ImageGallerySaver.saveImage(image);
+        final result = await ImageGallerySaver.saveImage(image,quality: 100);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ResultView(list: image)),
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Uint8List?> captureScreen() async {
     RenderRepaintBoundary boundary =
         globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ui.Image image = await boundary.toImage(pixelRatio: 4.0);
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
   }
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Expanded(
                   child: Image.asset(
                 'assets/images/3.jpg',
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 height: MediaQuery.sizeOf(context).height,
               )),
             ],
