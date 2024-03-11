@@ -10,7 +10,12 @@ class ResultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(
+          'ScreenShot Result',
+        ),
+        centerTitle: true,
+      ),
       body: Image.memory(list),
     );
   }
